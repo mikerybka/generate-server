@@ -1,0 +1,42 @@
+package main
+
+import (
+	"encoding/json"
+	"log"
+	"net/http"
+	"os"
+
+	"{{ .PkgPath }}"
+)
+
+func main() {
+	// Initialize server
+	s := &{{ .PkgName }}.{{ .TypeName }}{}
+
+	// Read config file
+	configFile := os.Getenv("CONFIG_FILE")
+	if configFile != "" {
+		f, err := os.Open(configFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+
+		err = json.NewDecoder(f).Decode(s)
+		if err != nil {
+			log.Fatalf("invalid config file: %s", err)
+		}
+	}
+
+	// Read port configuration
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+
+	// Start server
+	err := http.ListenAndServe(":"+port, s)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
